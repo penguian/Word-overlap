@@ -7,7 +7,7 @@
 //#include "fxt/comb/setpart-p-rgs-lex.h"
 #include "setpart-p-rgs-lex-exp.h"
 
-#include "fxt/fxtiomanip.h"
+#include "fxt/fxtio.h"
 
 #include "fxt/fxttypes.h"  // ulong
 
@@ -26,7 +26,7 @@
 // Uncomment to disable detailed printing
 // #define TOTALS_ONLY
 
-typedef ulong*     pu;  // Pointer to ulong 
+typedef ulong*     pu;  // Pointer to ulong
 typedef ulong**    ppu; // Pointer to pointer to ulong
 typedef ulong***   p3u; // Pointer to pointer to pointer to ulong
 typedef ulong****  p4u; // Pointer to pointer to pointer to pointer to ulong
@@ -97,7 +97,7 @@ void create_entry_mpi_struct_type()
   int          entry_mpi_blocklengths[5] = { 1, 1, 1, 1, 1 };
   MPI_Aint     entry_mpi_displacements[5];
   MPI_Datatype entry_mpi_types[5] = { MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG,
-                                      MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG, 
+                                      MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG,
                                       MPI_UNSIGNED_LONG };
   hist_entry dummy_pair;
   hist_entry* buff = &dummy_pair;
@@ -108,14 +108,14 @@ void create_entry_mpi_struct_type()
   MPI_Get_address(&(buff->m_ab),        &(entry_mpi_displacements[2]));
   MPI_Get_address(&(buff->m_ba),        &(entry_mpi_displacements[3]));
   MPI_Get_address(&(buff->m_nbr_pairs), &(entry_mpi_displacements[4]));
-  
+
   for (int k=0; k!=5; k++)
     entry_mpi_displacements[k] -= buff_address;
 
   MPI_Type_create_struct(5, entry_mpi_blocklengths, entry_mpi_displacements, entry_mpi_types, &entry_mpi_struct_type);
   MPI_Type_commit(&entry_mpi_struct_type);
 }
-  
+
 #ifndef WOC_ENTRY_BUFFER_SIZE
 #define WOC_ENTRY_BUFFER_SIZE 10000
 #endif
@@ -188,14 +188,14 @@ string poly(const ulong T, ulong x)
     for (; i >= 0; --i, x >>= 1)
       if (x % 2)
       {
-        op << "+"; 
+        op << "+";
         if (i == 0)
           op << "1";
         else if (i == 1)
           op << "z";
         else
           op << "z^" << i;
-      } 
+      }
   }
   return op.str();
 }
@@ -239,7 +239,7 @@ void calc_ab_ba(ulong *ab, ulong *ba, ulong m, ulong a, ulong b)
   while ( m );
 }
 
-void insert_hist(const ulong beta, const ulong nbr_pairs, 
+void insert_hist(const ulong beta, const ulong nbr_pairs,
                  ulong aa, ulong bb, ulong ab, ulong ba)
 {
   bool swapped_ab_ba = false;
@@ -463,7 +463,7 @@ ulong* new_setpart_p_rgs_array(const ulong beta, const ulong gamma)
     return s;
 }
 
-ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size, 
+ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size,
                                 const ulong* rgs_begin,const ulong* rgs_end)
 {
 #ifdef WOC_MPI_DEBUG
@@ -500,7 +500,7 @@ ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size,
       break;
 
     steps++;
-    
+
     ulong a = rgs_data[0];
     ulong b = rgs_data[T];
     for (ulong k=1; k<T; ++k)
@@ -542,7 +542,7 @@ main(int argc, char **argv)
 
   MPI_Init(&argc,&argv);
   create_entry_mpi_struct_type();
-  MPI_Comm_size(MPI_COMM_WORLD,&numprocs); 
+  MPI_Comm_size(MPI_COMM_WORLD,&numprocs);
   MPI_Comm_rank(MPI_COMM_WORLD,&myid);
   MPI_Get_processor_name(processor_name,&namelen);
 
@@ -561,7 +561,7 @@ main(int argc, char **argv)
   nbr_workers = numprocs - 1;
   if (nbr_workers < 0)
     return -1;
-    
+
   // Maximum number of bits needed to represent a character
   log2_alpha = (ulong) std::ceil(std::log(alpha)/std::log(2.0));
 #ifdef WOC_DEBUG
@@ -589,7 +589,7 @@ main(int argc, char **argv)
   #ifdef WOC_DEBUG
     cout << "log2_alpha ==" << setw(20) << log2_alpha
          << " (number of bits needed to represent a character)" << endl;
-    cout << "nbw        ==" << setw(20) << nbw 
+    cout << "nbw        ==" << setw(20) << nbw
          << " (number of bits needed to represent a word)" << endl;
     cout << "nbm        ==" << setw(20) << nbm
          << " (number of bits in mask)" << endl;
@@ -611,9 +611,9 @@ main(int argc, char **argv)
       orbit_size *=k;
     if (myid == 0)
     {
-      cout << "beta       ==" << setw(20) << beta 
+      cout << "beta       ==" << setw(20) << beta
            << " (number of different characters in the word pair)" << endl;
-      cout << "orbit_size ==" << setw(20) << orbit_size 
+      cout << "orbit_size ==" << setw(20) << orbit_size
            << " (size of an orbit under permutation of the alphabet)" << endl;
     }
     ulong partitions = 0;
@@ -697,7 +697,7 @@ main(int argc, char **argv)
       cout << " steps  ==" << setw(20) << steps
            << " (number of restricted growth strings generated for this value of beta, myid)"
            << endl;
-#endif      
+#endif
       if (myid == 0)
         recv_hist(beta);
       else
@@ -709,11 +709,11 @@ main(int argc, char **argv)
     if (myid == 0)
     {
       cout << "partitions ==" << setw(20) << partitions
-           << " (number of restricted growth strings generated for this value of beta)" 
+           << " (number of restricted growth strings generated for this value of beta)"
            << endl;
       cout << "=============" << endl;
     }
   }
-  MPI_Finalize(); 
+  MPI_Finalize();
   return 0;
 }
