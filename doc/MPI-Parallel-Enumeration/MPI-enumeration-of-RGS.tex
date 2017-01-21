@@ -1,0 +1,225 @@
+% Use the standard \LaTeXe\ article style in 12pt Computer Modern font 
+% on A4 paper by
+\documentclass[12pt,a4paper]{article}
+% Do \emph{not} change the width nor the height of the text from the 
+% defaults set by this document class.
+% 
+% The alternative which is closer to what we actually use is
+% \documentclass[11pt,a5paper]{article}
+% \usepackage[a5paper]{geometry}
+% Because it is a great size for on screen reading
+% and prints nicely on a4paper either 2up or booklet.
+
+% The preamble is to contain your own \LaTeX\ commands and to say 
+% what packages to use.  Three useful packages are the following:
+\usepackage{graphicx} % avoid epsfig or earlier such packages
+\usepackage{url}      % for URLs and DOIs
+\newcommand{\doi}[1]{\url{http://dx.doi.org/#1}}
+\usepackage{hyperref}
+\usepackage{amsmath}  % many want amsmath extensions
+\usepackage{amsfonts}
+\usepackage[usenames]{color}
+\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{pgfplots}
+%\pgfplotsset{compat=1.3}
+
+% Avoid loading unused packages (as done by some \LaTeX\ editors).
+
+%\input{psfig.sty}
+%
+\newtheorem*{lemma}{Lemma}
+\newtheorem{Lemma}{Lemma}
+\newtheorem*{theorem}{Theorem}
+\newtheorem{Theorem}[Lemma]{Theorem}
+\newtheorem*{conjecture}{Conjecture}
+\newtheorem{Conjecture}[Lemma]{Conjecture}
+\newtheorem*{corollary}{Corollary}
+\newtheorem{Corollary}[Lemma]{Corollary}
+\newtheorem*{remark}{Remark}
+\newtheorem{Remark}[Lemma]{Remark}
+\newtheorem*{definition}{Definition}
+\newtheorem{Definition}{Definition}
+
+\newcommand{\Integer}{\mathbb Z}
+\newcommand{\Natural}{\mathbb N}
+\newcommand{\Real}{\mathbb R}
+\newcommand{\Complex}{\mathbb C}
+
+\newcommand{\Domain}{\mathcal D}
+\newcommand{\RKHS}{\mathcal H}
+
+\newcommand{\Hilbert}{\mathbb H}
+\newcommand{\Poly}{\mathbb P}
+\newcommand{\Sphere}{\mathbb S}
+\newcommand{\Torus}{\mathbb T}
+
+\newcommand{\Kernel}{\mathcal K}
+\newcommand{\kernel}{K}
+
+\newcommand{\One}{\mathbf 1}
+
+\newcommand{\WTP}{\operatorname{WTP}}
+\newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
+\newcommand{\OrderH}{\operatorname{O}}
+\newcommand{\OrderL}{\operatorname{\Omega}}
+\newcommand{\Pt}[1]{\mathbf{#1}}
+\newcommand{\To}{\rightarrow}
+
+\newcommand{\Prog}[1]{\texttt{#1}}
+
+\newcommand{\argmin}{\operatorname{argmin}}
+\newcommand{\argmax}{\operatorname{argmax}}
+\newcommand{\linspan}{\operatorname{span}}
+
+\newcommand{\mb}[1]{\mathbb{#1}}
+\newcommand{\mf}[1]{\mathbf{#1}}
+
+% Create title and authors using \verb|\maketitle|.  Separate authors by 
+% \verb|\and| and put addresses in \verb|\thanks| command with
+% \verb|\url| command \verb|\protect|ed.
+
+\title{Parallel enumeration of word overlap correlation classes using MPI}
+
+\author{
+Paul~C.~Leopardi
+\thanks{Centre for Mathematics and its Applications, Australian National University.
+\protect\url{mailto:paul.leopardi@anu.edu.au}}
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+I now have an MPI version of the word-overlap-correlation program running on Orac. 
+At the moment, each job runs on 8 cores, as 6 ``worker'' processes and 2 ``scribe'' processes. 
+The workers enumerate Restricted Growth Strings and transform these into 
+correlation classes for pairs of words. 
+The scribe processes record and count the correlation classes.
+This note describes some aspects of the organization of the code and how it uses MPI.
+\end{abstract}
+% By default we include a table of contents in each paper.
+%\tableofcontents
+
+\section*{Splitting the sequence of beta-restricted growth strings into sub\-sequences}
+
+The program \texttt{word-over-corr-mpi-worker-scribe} enumerates a sequence of 
+beta-RGS (restricted growth strings for set partitions into beta parts) 
+in parallel, by splitting it into subsequences. Each subsequence is defined
+by two beta-RGS, which are instantiated by \texttt{ulong} arrays, called \verb!rgs_begin! 
+and \verb!rgs_end!, in the functions \verb!check_setpart_p_rgs_range()! and \verb!main()!. 
+Each subsequence begins with \verb!rgs_begin!, which is used to instantiate an 
+object of class \verb!setpart_p_rgs_lex! via the following call:
+\begin{verbatim}
+ setpart_p_rgs_lex p = setpart_p_rgs_lex(2*T,beta,rgs_begin);
+\end{verbatim}
+
+The function \verb!check_setpart_p_rgs_range()! contains a loop with the structure:
+
+\begin{verbatim}
+  for (bool more=true; more; more=p.next())
+  { ...
+    const ulong* rgs_data = p.data();
+    if (arrays_are_equal(2*T, rgs_data, rgs_end))
+      break;
+    ...
+  }
+\end{verbatim}
+
+Thus the subsequence begins with \verb!rgs_begin!, and continues via \verb!p.next()!, 
+up to but not including \verb!rgs_end!. A special sentinel value is used for 
+\verb!rgs_end! in the case of the final subsequence.
+
+The program currently uses two methods to create the beta-RGS \texttt{ulong} arrays.
+
+The first method is via the function \verb!new_setpart_p_rgs_array()! as follows:
+
+\begin{verbatim}
+  ulong* new_setpart_p_rgs_array(const ulong beta, 
+                                 const ulong gamma)
+  {
+    ulong* s = new ulong[2*T]; ...
+    for (ulong k = 0; k != 2*T; k++) 
+      s[k] = 0UL;
+    if (gamma > beta)
+      s[0] = ~0UL;
+    else
+    {
+      for (ulong k=0; k != gamma; k++)
+        s[k] = k;
+      for (ulong k=0; gamma + k < beta; k++)
+        s[2*T-beta+gamma+k] = gamma+k;
+      ...
+    }
+    return s;
+  }
+\end{verbatim}
+
+This routine can create \verb!beta+1! different beta-RGS arrays, depending on the
+value of \verb!gamma!. 
+
+The second method is to call 
+
+\begin{verbatim}
+  setpart_p_rgs_lex q = setpart_p_rgs_lex(delta,beta);
+\end{verbatim}
+
+with \verb!delta! $\geqslant$ \verb!beta!, continue via \verb!q.next()!, and extend the array by
+appending zeros. In the function \verb!main()!, this looks like:
+
+\begin{verbatim}
+  ulong delta = (beta+WOC_DELTA_OFFSET > 2*T) 
+              ? beta : beta+WOC_DELTA_OFFSET;
+  setpart_p_rgs_lex r = setpart_p_rgs_lex(2*T,beta);
+  const ulong* r_data = r.data();
+  ulong* rgs_begin = new ulong[2*T]; ...
+  for (int i = 0; i != 2*T; i++) 
+    rgs_begin[i] = r_data[i];
+  ulong* rgs_end = new ulong[2*T]; ...
+  for (int i = delta; i < 2*T; i++)
+    rgs_end[i] = 0;
+  setpart_p_rgs_lex q = setpart_p_rgs_lex(delta,beta); ...
+  for (bool more = true; more; more = q.next(), ...)
+  {
+    const ulong* q_data = q.data();
+    for (int i = 0; i != delta; i++)
+      rgs_end[i] = q_data[i];
+    // The subsequence [rgs_begin,rgs_end) 
+    // has now been defined.
+    for (int i = 0; i != 2*T; i++)
+      rgs_begin[i] = rgs_end[i];
+  }
+  rgs_end[0] = ~0UL;
+  // The final subsequence [rgs_begin,rgs_end)
+  //  has now been defined.
+\end{verbatim}
+
+I call this second method a double-loop method. The outer loop
+enumerates beta-RGS of length \verb!delta!, 
+where \verb!beta! $\leqslant$ \verb!delta! $\leqslant$ \verb!2*T!.
+The inner loop enumerates beta-RGS of length \verb!2*T!.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Acknowledgements.}
+%\begin{acknowledgement}
+
+Thanks to Joerg Arndt for the FXT library and many useful discussions.
+
+%\end{acknowledgement}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Choose one of these bibliography styles, comment out the other:
+
+%\addtocontents{toc}{\vspace{0.5cm}}
+
+\bibliographystyle{abbrv}
+
+%\bibliography{sph}
+
+\end{document}
+% ----------------------------------------------------------------
