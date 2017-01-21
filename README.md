@@ -1,6 +1,9 @@
 # Word-overlap
 Various code used to compute word overlap correlations per Guibas and Odlyzko, Rahmann and Rivals, Rukhin.
 
+## Please note
+These programs were not written to be shared and currently most do not come with *any* documentation. This may change in future.
+
 ## Authors
 Some of this code is based on code provided by *Joerg Arndt* while he was a PhD student at ANU.
 See especially [FXT: a library of algorithms](http://www.jjj.de/fxt/) 
@@ -28,6 +31,7 @@ using accurate calculation of the mean and variance of the number of missing wor
 ### Integer sequences
 
 [A152139: Correlation classes of pairs of different words, November 2008.](http://oeis.org/A152139)
+
 [A152959: Number of correlation classes for pairs of different words in an alphabet of size 4, December 2008.](http://oeis.org/A152959)
 
 ### Open source software
