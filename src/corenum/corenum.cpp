@@ -56,7 +56,7 @@ ulong quad_to_ulong(const bitstring xy, const bitstring yx, const bitstring xx, 
 
 struct corr_pattern
 {
-  corr_pattern(const bitstring& xyr, const bitstring& yxr, 
+  corr_pattern(const bitstring& xyr, const bitstring& yxr,
                const bitstring& xxr, const bitstring& yyr) :
   xy (xyr), yx (yxr), xx (xxr),  yy (yyr),
   count( 1 )
@@ -106,12 +106,12 @@ int main(int argc, char ** argv)
          << ":" << corr(ystr,xstr)
          << ":" << autocorr(xstr)
          << ":" << autocorr(ystr)
-         << ":" << xstr 
-         << ":" << ystr 
+         << ":" << xstr
+         << ":" << ystr
          << std::endl;
       */
     }
-    for (const_iterator 
+    for (const_iterator
       corr_it=corr_map.begin(); corr_it != corr_map.end(); ++corr_it)
     {
       const ulong key = corr_it->first;
@@ -122,15 +122,15 @@ int main(int argc, char ** argv)
          << ":" << pattern.yx
          << ":" << pattern.xx
          << ":" << pattern.yy
-         << ":" << std::setw(width) 
+         << ":" << std::setw(width)
                 << pattern.count
          << std::endl;
       if ((pattern.xx & pattern.xy).to_ulong())
-        std::cout << ": xx&xy == " << pattern.xx & pattern.xy
+        std::cout << ": xx&xy == " << (pattern.xx & pattern.xy)
         << std::endl;
       if ((pattern.yx & pattern.yy).to_ulong())
-        std::cout << ": yx&yy == " << pattern.yx & pattern.yy
+        std::cout << ": yx&yy == " << (pattern.yx & pattern.yy)
         << std::endl;
     }
-  return 0; 
+  return 0;
 }
