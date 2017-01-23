@@ -4,6 +4,10 @@
 #include <iomanip>
 #include <cmath>
 #include <map>
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2008-2016 Paul Leopardi
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #ifndef NUM_CHARS
 #define NUM_CHARS      4

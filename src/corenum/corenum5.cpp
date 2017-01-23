@@ -6,6 +6,11 @@
 #include <cmath>
 #include <bitset>
 #include <map>
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2008-2016 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #ifndef NUM_CHARS
 #define NUM_CHARS      4
@@ -91,7 +96,7 @@ ulong quad_to_ulong(const bitstring xy, const bitstring yx, const bitstring xx, 
 
 struct corr_pattern
 {
-  corr_pattern(const bitstring& xyr, const bitstring& yxr, 
+  corr_pattern(const bitstring& xyr, const bitstring& yxr,
                const bitstring& xxr, const bitstring& yyr) :
   xy (xyr), yx (yxr), xx (xxr),  yy (yyr),
   count( 1 )
@@ -144,12 +149,12 @@ int main(int argc, char ** argv)
     }
   }
   ulong i=0;
-  for (const_iterator 
+  for (const_iterator
     corr_it=corr_map.begin(); corr_it != corr_map.end(); ++corr_it, ++i)
   {
     const ulong key = corr_it->first;
     const corr_pattern& pattern = corr_it->second;
-    std::cout 
+    std::cout
         << ": XX[" << i << "]:=" << bits(pattern.xx)
         << ": XY[" << i << "]:=" << bits(pattern.xy)
         << ": XX&XY[" << i << "]:=" << bits(pattern.xx & pattern.xy)
@@ -159,5 +164,5 @@ int main(int argc, char ** argv)
         // << ": count[" << i << "]:= " << pattern.count * 2
         << " :" << std::endl;
   }
-  return 0; 
+  return 0;
 }
