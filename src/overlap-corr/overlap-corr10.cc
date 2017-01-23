@@ -1,4 +1,9 @@
 //% generate all overlap correlations
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2008-2016 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #include "fxt/bits-all.h"
 
@@ -70,14 +75,14 @@ string poly(ulong x)
     for (; i >= 0; --i, x >>= 1)
       if (x % 2)
       {
-        op << "+"; 
+        op << "+";
         if (i == 0)
           op << "1";
         else if (i == 1)
           op << "z";
         else
           op << "z^" << i;
-      } 
+      }
   }
   return op.str();
 }
@@ -121,7 +126,7 @@ void output_hist(const anpppu hist)
               }
           }
         }
-    }  
+    }
     cout << "ctnz=" << ctnz << endl;
     cout << "ct=" << ct << endl;
 }
@@ -162,7 +167,7 @@ main(int argc, char **argv)
 
   anpppu hist;
   for (ulong k=0; k<N; ++k)
-    hist[k] = NULL;  
+    hist[k] = NULL;
 
   for (ulong a=0; a<Ns; ++a)
   {

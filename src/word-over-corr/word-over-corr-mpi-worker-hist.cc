@@ -1,4 +1,9 @@
 //% generate all word overlap correlations
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2012-2017 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #include "mpi.h"
 #include <stdlib.h>

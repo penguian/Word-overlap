@@ -1,4 +1,9 @@
 //% generate all overlap correlations
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2008-2016 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #include "fxt/bits-all.h"
 
@@ -70,14 +75,14 @@ void output_hist(const anpppu hist)
                     print_bin("", N+aa, n);
                     cout << ":";
                     print_bin("", N+bb, n);
-                    cout << " * " << setw(10) 
+                    cout << " * " << setw(10)
                         << habbaaabb*2 << endl;
 #endif
                 }
               }
           }
         }
-    }  
+    }
     cout << "ctnz=" << ctnz << endl;
     cout << "ct=" << ct << endl;
 }
@@ -109,7 +114,7 @@ main(int argc, char **argv)
 
   anpppu hist;
   for (ulong ab=0; ab<N; ++ab)
-      hist[ab] = NULL;  
+      hist[ab] = NULL;
 
   print_bin(" m0=", m0, 0);  cout << endl;
 

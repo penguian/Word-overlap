@@ -1,5 +1,9 @@
 
 //% generate all overlap correlations
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2008-2016 Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 
 #include "fxt/bits-all.h"

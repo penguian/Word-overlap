@@ -1,4 +1,8 @@
 //% generate all word overlap correlations
+// Copyright (C) 2011-2017 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #include "mpi.h"
 #include <stdlib.h>
@@ -26,7 +30,7 @@
 // Uncomment to disable detailed printing
 // #define TOTALS_ONLY
 
-typedef ulong*     pu;  // Pointer to ulong 
+typedef ulong*     pu;  // Pointer to ulong
 typedef ulong**    ppu; // Pointer to pointer to ulong
 typedef ulong***   p3u; // Pointer to pointer to pointer to ulong
 typedef ulong****  p4u; // Pointer to pointer to pointer to pointer to ulong
@@ -100,8 +104,8 @@ void create_pair_mpi_struct_type()
   // MPI variables
   int pair_mpi_blocklengths[6] = { 1, 1, 1, 1, 1, 1 };
   MPI_Aint  pair_mpi_displacements[6];
-  MPI_Datatype pair_mpi_types[6] = { MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG, 
-                                     MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG, 
+  MPI_Datatype pair_mpi_types[6] = { MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG,
+                                     MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG,
                                      MPI_UNSIGNED_LONG, MPI_UNSIGNED_LONG };
   word_pair dummy_pair;
   word_pair* buff = &dummy_pair;
@@ -113,14 +117,14 @@ void create_pair_mpi_struct_type()
   MPI_Get_address(&(buff->m_bb), &(pair_mpi_displacements[3]));
   MPI_Get_address(&(buff->m_ab), &(pair_mpi_displacements[4]));
   MPI_Get_address(&(buff->m_ba), &(pair_mpi_displacements[5]));
-  
+
   for (int k=0; k!=6; k++)
     pair_mpi_displacements[k] -= buff_address;
 
   MPI_Type_create_struct(6, pair_mpi_blocklengths, pair_mpi_displacements, pair_mpi_types, &pair_mpi_struct_type);
   MPI_Type_commit(&pair_mpi_struct_type);
 }
-  
+
 #ifndef WOC_PAIR_BUFFER_SIZE
 #define WOC_PAIR_BUFFER_SIZE 10000
 #endif
@@ -193,14 +197,14 @@ string poly(const ulong T, ulong x)
     for (; i >= 0; --i, x >>= 1)
       if (x % 2)
       {
-        op << "+"; 
+        op << "+";
         if (i == 0)
           op << "1";
         else if (i == 1)
           op << "z";
         else
           op << "z^" << i;
-      } 
+      }
   }
   return op.str();
 }
@@ -256,7 +260,7 @@ void output_hist()
   {
 #ifdef WOC_MPI_DEBUG
       cout << "Process " << myid << " approached Barrier 1 in output_hist()" << endl;
-#endif      
+#endif
       MPI_Barrier(MPI_COMM_WORLD);
 #ifdef WOC_MPI_DEBUG
       cout << "Process " << myid << " passed Barrier 1 in output_hist()" << endl;
@@ -264,7 +268,7 @@ void output_hist()
       MPI_Reduce(&classes, &tot_classes, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 #ifdef WOC_MPI_DEBUG
       cout << "Process " << myid << " approached Barrier 2 in output_hist()" << endl;
-#endif      
+#endif
       MPI_Barrier(MPI_COMM_WORLD);
 #ifdef WOC_MPI_DEBUG
       cout << "Process " << myid << " passed Barrier 2 in output_hist()" << endl;
@@ -274,7 +278,7 @@ void output_hist()
   }
   if (myid == 0)
   {
-    cout << "classes    ==" << setw(20) << tot_classes 
+    cout << "classes    ==" << setw(20) << tot_classes
          << " (number of correlation classes so far)" << endl;
     cout << "pairs      ==" << setw(20) << tot_pairs
          << " (number of different pairs of unequal words so far)" << endl;
@@ -321,7 +325,7 @@ void calc_ab_ba(ulong *ab, ulong *ba, ulong m, ulong a, ulong b)
   while ( m );
 }
 
-void insert_hist(const ulong beta, const ulong orbit_size, 
+void insert_hist(const ulong beta, const ulong orbit_size,
                  const ulong a, const ulong b, ulong aa, ulong bb, ulong ab, ulong ba)
 {
   bool swapped_ab_ba = false;
@@ -419,7 +423,7 @@ ulong* new_setpart_p_rgs_array(const ulong beta, const ulong gamma)
     return s;
 }
 
-ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size, 
+ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size,
                                 const ulong* rgs_begin,const ulong* rgs_end)
 {
 #ifdef WOC_MPI_DEBUG
@@ -460,7 +464,7 @@ ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size,
 #ifdef WOC_MPI_DEBUG
           cout << "Process " << myid << " sent to " << scribe << " : " << buff_index[scribe] << endl;
 #endif
-          buff_index[scribe] = 0;     
+          buff_index[scribe] = 0;
         }
     const ulong* rgs_data = p.data();
 
@@ -468,7 +472,7 @@ ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size,
       break;
 
     steps++;
-    
+
     ulong a = rgs_data[0];
     ulong b = rgs_data[T];
     for (ulong k=1; k<T; ++k)
@@ -490,7 +494,7 @@ ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size,
       ulong ba = 0;  // corr
       calc_ab_ba(&ab, &ba, m0, a, b);
       if (myid < nbr_scribes)
-        insert_hist(beta, orbit_size, a, b, aa, bb, ab, ba); 
+        insert_hist(beta, orbit_size, a, b, aa, bb, ab, ba);
       else
       {
         int scribe = (int) (std::max(ab, ba) % nbr_scribes);
@@ -508,7 +512,7 @@ ulong check_setpart_p_rgs_range(const ulong beta, const ulong orbit_size,
       MPI_Send((void*) &(pair_buffer[scribe][0]), buff_index[scribe], pair_mpi_struct_type, scribe, MORE_TAG, MPI_COMM_WORLD);
 #ifdef WOC_MPI_DEBUG
       cout << "Process " << myid << " sent to " << scribe << " : " << buff_index[scribe] << " after inner loop " << endl;
-#endif   
+#endif
     }
   return steps;
 }
@@ -522,7 +526,7 @@ main(int argc, char **argv)
 
   MPI_Init(&argc,&argv);
   create_pair_mpi_struct_type();
-  MPI_Comm_size(MPI_COMM_WORLD,&numprocs); 
+  MPI_Comm_size(MPI_COMM_WORLD,&numprocs);
   MPI_Comm_rank(MPI_COMM_WORLD,&myid);
   MPI_Get_processor_name(processor_name,&namelen);
 
@@ -539,12 +543,12 @@ main(int argc, char **argv)
 
   if (argc > 3)
     sscanf(argv[3],"%lu",&nbr_scribes);
-  
+
   // Number of worker  processes
   nbr_workers = numprocs - nbr_scribes;
   if (nbr_workers < 0 || (nbr_workers == 0 && nbr_scribes > 1))
     return -1;
-    
+
   // Maximum number of bits needed to represent a character
   log2_alpha = (ulong) std::ceil(std::log(alpha)/std::log(2.0));
 #ifdef WOC_DEBUG
@@ -572,7 +576,7 @@ main(int argc, char **argv)
   #ifdef WOC_DEBUG
     cout << "log2_alpha ==" << setw(20) << log2_alpha
          << " (number of bits needed to represent a character)" << endl;
-    cout << "nbw        ==" << setw(20) << nbw 
+    cout << "nbw        ==" << setw(20) << nbw
          << " (number of bits needed to represent a word)" << endl;
     cout << "nbm        ==" << setw(20) << nbm
          << " (number of bits in mask)" << endl;
@@ -586,16 +590,16 @@ main(int argc, char **argv)
   {
     hist = (p4u) malloc(N*sizeof(p3u));
     for (ulong k=0; k < N; ++k)
-      hist[k] = NULL;  
+      hist[k] = NULL;
     pair_buffer = new pword_pair[1];
-    pair_buffer[0] = new word_pair[pair_buffer_size]; 
+    pair_buffer[0] = new word_pair[pair_buffer_size];
   }
   else
   {
     buff_index = new int[nbr_scribes];
     pair_buffer = new pword_pair[nbr_scribes];
     for (int scribe=0; scribe != nbr_scribes; scribe++)
-      pair_buffer[scribe] = new word_pair[pair_buffer_size]; 
+      pair_buffer[scribe] = new word_pair[pair_buffer_size];
   }
   for (ulong beta=2; beta<=alpha; ++beta)
   {
@@ -604,9 +608,9 @@ main(int argc, char **argv)
       orbit_size *=k;
     if (myid == 0)
     {
-      cout << "beta       ==" << setw(20) << beta 
+      cout << "beta       ==" << setw(20) << beta
            << " (number of different characters in the word pair)" << endl;
-      cout << "orbit_size ==" << setw(20) << orbit_size 
+      cout << "orbit_size ==" << setw(20) << orbit_size
            << " (size of an orbit under permutation of the alphabet)" << endl;
     }
     ulong partitions = 0;
@@ -617,7 +621,7 @@ main(int argc, char **argv)
         ulong* rgs_begin = new_setpart_p_rgs_array(beta, 1);
         if (rgs_begin == (ulong *) NULL)
           return -1;
-        
+
         ulong* rgs_end = new_setpart_p_rgs_array(beta, beta+1);
         if (rgs_end == (ulong *) NULL)
           return -1;
@@ -642,10 +646,10 @@ main(int argc, char **argv)
           cout << "Process " << myid << " received " << nbr_word_pairs << endl;
 #endif
           for (int j = 0; j != nbr_word_pairs; j++)
-          {           
+          {
             word_pair* buff = &(pair_buffer[0][j]);
-            insert_hist(beta, orbit_size, buff->m_a,  buff->m_b, 
-                                          buff->m_aa, buff->m_bb, 
+            insert_hist(beta, orbit_size, buff->m_a,  buff->m_b,
+                                          buff->m_aa, buff->m_bb,
                                           buff->m_ab, buff->m_ba);
           }
           if (status.MPI_TAG == END_TAG)
@@ -668,7 +672,7 @@ main(int argc, char **argv)
           return -1;
         for (int i = 0; i != 2*T; i++)
           rgs_begin[i] = r_data[i];
-        
+
         ulong* rgs_end = new ulong[2*T];
         if (rgs_end == (ulong *) NULL)
           return -1;
@@ -685,7 +689,7 @@ main(int argc, char **argv)
           if (delta_index % nbr_workers + nbr_scribes == (ulong) myid)
           {
 #ifdef WOC_MPI_DEBUG
-            cout << "Process " << myid 
+            cout << "Process " << myid
                  << " delta_index % nbr_workers + nbr_scribes ==" << delta_index % nbr_workers + nbr_scribes
                  << " delta_index ==" << delta_index
                  << endl;
@@ -699,7 +703,7 @@ main(int argc, char **argv)
         if (delta_index % nbr_workers + nbr_scribes == (ulong) myid)
         {
 #ifdef WOC_MPI_DEBUG
-          cout << "Process " << myid 
+          cout << "Process " << myid
                << " delta_index % nbr_workers + nbr_scribes ==" << delta_index % nbr_workers + nbr_scribes
                << " delta_index ==" << delta_index
                << endl;
@@ -711,39 +715,39 @@ main(int argc, char **argv)
           MPI_Send((void*) &(pair_buffer[scribe][0]), 0, pair_mpi_struct_type, scribe, END_TAG, MPI_COMM_WORLD);
 #ifdef WOC_MPI_DEBUG
           cout << "Process " << myid << " to " << scribe << " sent END_TAG after outer loop " << endl;
-#endif        
+#endif
         }
         delete [] rgs_begin;
         delete [] rgs_end;
       }
 #ifdef WOC_MPI_DEBUG
       cout << "Process " << myid << " approached Barrier" << endl;
-#endif      
+#endif
       MPI_Barrier(MPI_COMM_WORLD);
 #ifdef WOC_MPI_DEBUG
       cout << "Process " << myid << " passed Barrier" << endl;
 #endif
       MPI_Reduce(&steps, &partitions, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
-#ifdef WOC_MPI_VERBOSE      
+#ifdef WOC_MPI_VERBOSE
       if (myid >= nbr_scribes)
       {
         cout << "P" << setw(2) << myid;
         cout << " steps  ==" << setw(20) << steps
-             << " (number of restricted growth strings generated for this value of beta, myid)" 
+             << " (number of restricted growth strings generated for this value of beta, myid)"
              << endl;
       }
-#endif      
+#endif
     }
     if (myid == 0)
     {
       cout << "partitions ==" << setw(20) << partitions
-           << " (number of restricted growth strings generated for this value of beta)" 
+           << " (number of restricted growth strings generated for this value of beta)"
            << endl;
     }
     MPI_Barrier(MPI_COMM_WORLD);
     output_hist();
     MPI_Barrier(MPI_COMM_WORLD);
   }
-  MPI_Finalize(); 
+  MPI_Finalize();
   return 0;
 }

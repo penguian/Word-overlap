@@ -1,4 +1,9 @@
 //% generate all word overlap correlations
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2011-2017 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #include <stdlib.h>
 
@@ -22,7 +27,7 @@
 // Uncomment to disable detailed printing
 // #define TOTALS_ONLY
 
-typedef ulong*     pu;  // Pointer to ulong 
+typedef ulong*     pu;  // Pointer to ulong
 typedef ulong**    ppu; // Pointer to pointer to ulong
 typedef ulong***   p3u; // Pointer to pointer to pointer to ulong
 typedef ulong****  p4u; // Pointer to pointer to pointer to pointer to ulong
@@ -92,14 +97,14 @@ string poly(const ulong T, ulong x)
     for (; i >= 0; --i, x >>= 1)
       if (x % 2)
       {
-        op << "+"; 
+        op << "+";
         if (i == 0)
           op << "1";
         else if (i == 1)
           op << "z";
         else
           op << "z^" << i;
-      } 
+      }
   }
   return op.str();
 }
@@ -143,8 +148,8 @@ void output_hist(const ulong N, const ulong T, const p4u hist)
               }
           }
         }
-    }  
-    cout << "classes    ==" << setw(20) << classes 
+    }
+    cout << "classes    ==" << setw(20) << classes
               << " (number of correlation classes so far)" << endl;
     cout << "pairs      ==" << setw(20) << pairs
               << " (number of different pairs of unequal words so far)" << endl;
@@ -295,7 +300,7 @@ ulong* new_setpart_p_rgs_array(const ulong T, const ulong beta, const ulong gamm
 }
 
 ulong check_setpart_p_rgs_range(const ulong T, const ulong log2_alpha, const ulong m0, const ulong N,
-                                const ulong beta, const ulong orbit_size, 
+                                const ulong beta, const ulong orbit_size,
                                 const ulong* rgs_begin,const ulong* rgs_end, const p4u hist)
 {
   setpart_p_rgs_lex p = setpart_p_rgs_lex(2*T,beta,rgs_begin);
@@ -304,7 +309,7 @@ ulong check_setpart_p_rgs_range(const ulong T, const ulong log2_alpha, const ulo
   ulong partitions = 0;
   for (bool more=true; more; more=p.next())
   {
-  
+
     const ulong* rgs_data = p.data();
     if (arrays_are_equal(2*T, rgs_data, rgs_end))
       break;
@@ -312,7 +317,7 @@ ulong check_setpart_p_rgs_range(const ulong T, const ulong log2_alpha, const ulo
      //cout << rgs_data[k];
     //cout << endl;
     partitions++;
-    
+
     ulong a = rgs_data[0];
     ulong b = rgs_data[T];
     for (ulong k=1; k<T; ++k)
@@ -332,7 +337,7 @@ ulong check_setpart_p_rgs_range(const ulong T, const ulong log2_alpha, const ulo
       ulong ab = 0;  // corr
       ulong ba = 0;  // corr
       calc_ab_ba(&ab, &ba, log2_alpha, m0, a, b);
-      insert_hist(hist, N, T, log2_alpha, beta, orbit_size, m0, a, b, olda, oldaa, ab, ba); 
+      insert_hist(hist, N, T, log2_alpha, beta, orbit_size, m0, a, b, olda, oldaa, ab, ba);
     }
   }
   return partitions;
@@ -356,7 +361,7 @@ main(int argc, char **argv)
   if (argc > 3)
     sscanf(argv[3],"%lu",&max_ranges);
   max_ranges = (max_ranges>2*T) ? 2*T : max_ranges;
-  
+
   // Maximum number of bits needed to represent a character
   const ulong log2_alpha = (ulong) std::ceil(std::log(alpha)/std::log(2.0));
 #ifdef WOC_DEBUG
@@ -383,7 +388,7 @@ main(int argc, char **argv)
 #ifdef WOC_DEBUG
   cout << "log2_alpha ==" << setw(20) << log2_alpha
             << " (number of bits needed to represent a character)" << endl;
-  cout << "nbw        ==" << setw(20) << nbw 
+  cout << "nbw        ==" << setw(20) << nbw
             << " (number of bits needed to represent a word)" << endl;
   cout << "nbm        ==" << setw(20) << nbm
             << " (number of bits in mask)" << endl;
@@ -394,7 +399,7 @@ main(int argc, char **argv)
 
   const p4u hist = (p4u) malloc(N*sizeof(p3u));
   for (ulong k=0; k<N; ++k)
-    hist[k] = NULL;  
+    hist[k] = NULL;
 
   for (ulong beta=2; beta<=alpha; ++beta)
   {
@@ -402,9 +407,9 @@ main(int argc, char **argv)
     for (ulong k=alpha; k>alpha-beta; --k)
       orbit_size *=k;
 
-    cout << "beta       ==" << setw(20) << beta 
+    cout << "beta       ==" << setw(20) << beta
          << " (number of different characters in the word pair)" << endl;
-    cout << "orbit_size ==" << setw(20) << orbit_size 
+    cout << "orbit_size ==" << setw(20) << orbit_size
          << " (size of an orbit under permutation of the alphabet)" << endl;
     ulong partitions = 0;
     if (beta > max_ranges)
@@ -412,7 +417,7 @@ main(int argc, char **argv)
       ulong* rgs_begin = new_setpart_p_rgs_array(T, beta, 1);
       if (rgs_begin == (ulong *) NULL)
         return -1;
-      
+
       ulong* rgs_end = new_setpart_p_rgs_array(T, beta, beta+1);
       if (rgs_end == (ulong *) NULL)
         return -1;
@@ -428,7 +433,7 @@ main(int argc, char **argv)
         ulong* rgs_begin = new_setpart_p_rgs_array(T, beta, gamma);
         if (rgs_begin == (ulong *) NULL)
           return -1;
-        
+
         ulong* rgs_end = new_setpart_p_rgs_array(T, beta, gamma+1);
         if (rgs_end == (ulong *) NULL)
           return -1;
@@ -441,7 +446,7 @@ main(int argc, char **argv)
         {
           cout << "gamma      ==" << setw(20) << gamma << endl;
           cout << "steps      ==" << setw(20) << steps
-               << " (number of restricted growth strings generated for this value of beta, gamma)" 
+               << " (number of restricted growth strings generated for this value of beta, gamma)"
                << endl;
         }
         partitions += steps;
@@ -449,7 +454,7 @@ main(int argc, char **argv)
     if (partitions > 0)
     {
       cout << "partitions ==" << setw(20) << partitions
-           << " (number of restricted growth strings generated for this value of beta)" 
+           << " (number of restricted growth strings generated for this value of beta)"
            << endl;
     }
     output_hist(N, T, hist);

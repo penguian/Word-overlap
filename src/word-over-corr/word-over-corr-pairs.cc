@@ -1,4 +1,9 @@
 //% generate all word overlap correlations
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2010-2017 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #include <stdlib.h>
 
@@ -29,7 +34,7 @@ typedef struct
   ulong Y;
 } count_pair;
 
-typedef count_pair*     pu;  // Pointer to count_pair 
+typedef count_pair*     pu;  // Pointer to count_pair
 typedef count_pair**    ppu; // Pointer to pointer to count_pair
 typedef count_pair***   p3u; // Pointer to pointer to pointer to count_pair
 typedef count_pair****  p4u; // Pointer to pointer to pointer to pointer to count_pair
@@ -99,14 +104,14 @@ string poly(const ulong T, ulong x)
     for (; i >= 0; --i, x >>= 1)
       if (x % 2)
       {
-        op << "+"; 
+        op << "+";
         if (i == 0)
           op << "1";
         else if (i == 1)
           op << "z";
         else
           op << "z^" << i;
-      } 
+      }
   }
   return op.str();
 }
@@ -150,8 +155,8 @@ void output_hist(const ulong T, const ulong N, const p4u hist)
               }
           }
         }
-    }  
-    cout << "classes    ==" << setw(20) << classes 
+    }
+    cout << "classes    ==" << setw(20) << classes
               << " (number of correlation classes so far)" << endl;
     cout << "pairs      ==" << setw(20) << pairs
               << " (number of different pairs of unequal words so far)" << endl;
@@ -216,7 +221,7 @@ main(int argc, char **argv)
 #ifdef WOC_DEBUG
   cout << "log2_alpha ==" << setw(20) << log2_alpha
             << " (number of bits needed to represent a character)" << endl;
-  cout << "nbw        ==" << setw(20) << nbw 
+  cout << "nbw        ==" << setw(20) << nbw
             << " (number of bits needed to represent a word)" << endl;
   cout << "nbm        ==" << setw(20) << nbm
             << " (number of bits in mask)" << endl;
@@ -227,7 +232,7 @@ main(int argc, char **argv)
 
   if (!(nbw <= BITS_PER_LONG))
   {
-    cout << "Must have (nbw <= BITS_PER_LONG) but nbw==" << nbw 
+    cout << "Must have (nbw <= BITS_PER_LONG) but nbw==" << nbw
          << "; BITS_PER_LONG==" << BITS_PER_LONG << endl;
     exit(1);
   }
@@ -238,14 +243,14 @@ main(int argc, char **argv)
   }
   if (!(alpha <= 2*T))
   {
-    cout << "Must have (alpha <= 2*T) but alpha==" << alpha 
+    cout << "Must have (alpha <= 2*T) but alpha==" << alpha
          << "; 2*T==" << (2*T) << endl;
     exit(1);
   }
 
   const p4u hist = (p4u) malloc(N*sizeof(p3u));
   for (ulong k=0; k<N; ++k)
-    hist[k] = NULL;  
+    hist[k] = NULL;
 
   for (ulong beta=2; beta<=alpha; ++beta)
   {
@@ -253,9 +258,9 @@ main(int argc, char **argv)
     for (ulong k=alpha; k>alpha-beta; --k)
       orbit_size *=k;
 
-    cout << "beta       ==" << setw(20) << beta 
+    cout << "beta       ==" << setw(20) << beta
               << " (number of different characters in the word pair)" << endl;
-    cout << "orbit_size ==" << setw(20) << orbit_size 
+    cout << "orbit_size ==" << setw(20) << orbit_size
               << " (size of an orbit under permutation of the alphabet)" << endl;
 
     setpart_p_rgs_lex p = setpart_p_rgs_lex(2*T,beta);

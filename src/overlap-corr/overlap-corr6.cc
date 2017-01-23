@@ -1,5 +1,10 @@
 
 //% generate all overlap correlations
+// This file is part of the Word-overlap collection.
+// Copyright (C) 2008-2016 Paul Leopardi
+// Parts of this code are based on code by Joerg Arndt
+// License: GNU General Public License version 3 or later,
+// see the file COPYING.txt in the src directory.
 
 #include "fxt/bits-all.h"
 
@@ -75,7 +80,7 @@ main(int argc, char **argv)
 
     anpanu hist;
     for (ulong j=0; j<N; ++j)
-        hist[j] = NULL;  
+        hist[j] = NULL;
 
     const ulong m0 = (1 << nbm) - 1;  // aux mask
     print_bin(" m0=", m0, 0);  cout << endl;
